@@ -29,13 +29,18 @@ Add libSQLite.a (from Workspace location) to the required Libraries and Framewor
 
 ![alt tag](https://raw.github.com/axsy-dev/react-native-sqlcipher-storage/master/instructions/addlibs.png)
 
-#### Step 4. Application JavaScript require
+#### Step 4. Adjust Sqlite3 linker
+
+In case of your is using other third party dependencies with sqlite3 linker (e.g. Firebase).
+Add `$(BUILT_PRODUCTS_DIR)/libSQLite.a` into project level `Build Settings` -> `Other Linker Flags`
+
+#### Step 5. Application JavaScript require
 
 Add var SQLite = require('react-native-sqlcipher-storage') to your index.ios.js
 
 ![alt tag](https://raw.github.com/axsy-dev/react-native-sqlcipher-storage/master/instructions/require.png)
 
-#### Step 5. Application JavaScript code using the SQLite plugin
+#### Step 6. Application JavaScript code using the SQLite plugin
 
 Add JS application code to use SQLite API in your index.ios.js etc. Here is some sample code. For full working example see test/TestRunner/index.ios.js.
 
