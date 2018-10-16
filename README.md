@@ -31,7 +31,7 @@ Add libSQLite.a (from Workspace location) to the required Libraries and Framewor
 
 #### Step 4. Adjust Sqlite3 linker
 
-In case of your is using other third party dependencies with sqlite3 linker (e.g. Firebase).
+In case of your app is using other third party dependencies with sqlite3 linker (e.g. Firebase).
 Add `$(BUILT_PRODUCTS_DIR)/libSQLite.a` into project level `Build Settings` -> `Other Linker Flags`
 
 #### Step 5. Application JavaScript require
