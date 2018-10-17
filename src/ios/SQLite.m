@@ -183,14 +183,18 @@ RCT_EXPORT_METHOD(open: (NSDictionary *) options success:(RCTResponseSenderBlock
         NSString *dbkey = [options objectForKey:@"key"];
         const char *key = NULL;
         if (dbkey != NULL) key = [dbkey UTF8String];
-        if (key != NULL) sqlite3_key(db, key, strlen(key));
-        
+        if (key != NULL) {
+          if(sqlite3_key(db, key, strlen(key)) != SQLITE_OK){
+            NSLog(@"sqlite3_key() fail. Unable to set Database Key");
+          }
+        }
         // Attempt to read the SQLite master table [to support SQLCipher version]:
         if(sqlite3_exec(db, (const char*)"SELECT count(*) FROM sqlite_master;", NULL, NULL, NULL) == SQLITE_OK) {
           dbPointer = [NSValue valueWithPointer:db];
           [openDBs setObject: dbPointer forKey: dbfilename];
           pluginResult = [SQLiteResult resultWithStatus:SQLiteStatus_OK messageAsString:@"Database opened"];
         } else {
+          NSLog(@"Unable to open DB with key");
           pluginResult = [SQLiteResult resultWithStatus:SQLiteStatus_ERROR messageAsString:@"Unable to open DB with key"];
           // XXX TODO: close the db handle & [perhaps] remove from openDBs!!
         }
