@@ -331,6 +331,10 @@ public class SQLitePlugin extends ReactContextBaseJavaModule {
      * @param cbc - JS callback context
      */
     private void startDatabase(String dbname, String key, JSONObject options, CallbackContext cbc) {
+        if(TextUtils.isEmpty(key) || key.toLowerCase().equals("null")){
+            key = null;
+        }
+
         // TODO: is it an issue that we can orphan an existing thread?  What should we do here?
         // If we re-use the existing DBRunner it might be in the process of closing...
         DBRunner r = dbrmap.get(dbname);

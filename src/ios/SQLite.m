@@ -183,7 +183,7 @@ RCT_EXPORT_METHOD(open: (NSDictionary *) options success:(RCTResponseSenderBlock
         NSString *dbkey = [options objectForKey:@"key"];
         const char *key = NULL;
         if (dbkey != NULL) key = [dbkey UTF8String];
-        if (key != NULL) {
+        if (key != NULL && strlen(key) && ![[dbkey lowercaseString] isEqualToString:@"null"]) {
           if(sqlite3_key(db, key, strlen(key)) != SQLITE_OK){
             NSLog(@"sqlite3_key() fail. Unable to set Database Key");
           }
