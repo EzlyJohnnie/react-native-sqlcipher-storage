@@ -161,7 +161,6 @@ RCT_EXPORT_METHOD(open: (NSDictionary *) options success:(RCTResponseSenderBlock
       NSLog(@"Reusing existing database connection for db name %@", dbfilename);
       pluginResult = [SQLiteResult resultWithStatus:SQLiteStatus_OK messageAsString:@"Database opened"];
     } else {
-      const char *name = [dbname UTF8String];
       sqlite3 *db;
       
       NSLog(@"open full db path: %@", dbname);
@@ -173,32 +172,33 @@ RCT_EXPORT_METHOD(open: (NSDictionary *) options success:(RCTResponseSenderBlock
           [self createFromResource:dbfilename withDbname:dbname];
       }
       
-      if (sqlite3_open(name, &db) != SQLITE_OK) {
-        pluginResult = [SQLiteResult resultWithStatus:SQLiteStatus_ERROR messageAsString:@"Unable to open DB"];
-        return;
-      } else {
-        sqlite3_create_function(db, "regexp", 2, SQLITE_ANY, NULL, &sqlite_regexp, NULL, NULL);
-        
-        // for SQLCipher version:
-        NSString *dbkey = [options objectForKey:@"key"];
-        const char *key = NULL;
-        if (dbkey != NULL) key = [dbkey UTF8String];
-        if (key != NULL && strlen(key) && ![[dbkey lowercaseString] isEqualToString:@"null"]) {
-          if(sqlite3_key(db, key, strlen(key)) != SQLITE_OK){
-            NSLog(@"sqlite3_key() fail. Unable to set Database Key");
-          }
-        }
-        // Attempt to read the SQLite master table [to support SQLCipher version]:
-        if(sqlite3_exec(db, (const char*)"SELECT count(*) FROM sqlite_master;", NULL, NULL, NULL) == SQLITE_OK) {
-          dbPointer = [NSValue valueWithPointer:db];
-          [openDBs setObject: dbPointer forKey: dbfilename];
-          pluginResult = [SQLiteResult resultWithStatus:SQLiteStatus_OK messageAsString:@"Database opened"];
-        } else {
-          NSLog(@"Unable to open DB with key");
-          pluginResult = [SQLiteResult resultWithStatus:SQLiteStatus_ERROR messageAsString:@"Unable to open DB with key"];
-          // XXX TODO: close the db handle & [perhaps] remove from openDBs!!
+      NSString *dbkey = [options objectForKey:@"key"];
+      
+      sqlite3 *unencryptedDB = [self openDatabase:dbname key:nil];
+      if(unencryptedDB){
+        //db is unencrypted and open success
+        db = unencryptedDB;
+        if(db && dbkey.length && ![[dbkey lowercaseString] isEqualToString:@"null"]){
+          //encrypt db if key provided
+          db = [self encryptDatabase:db key:dbkey dbname:dbname];
         }
       }
+      else {
+        //db is encrypted, try to open with provided key
+        db = [self openDatabase:dbname key:dbkey];
+      }
+      
+      if(db){
+        //open db success
+        dbPointer = [NSValue valueWithPointer:db];
+        [openDBs setObject: dbPointer forKey: dbfilename];
+        pluginResult = [SQLiteResult resultWithStatus:SQLiteStatus_OK messageAsString:@"Database opened"];
+      }
+      else{
+        //open db failed
+        pluginResult = [SQLiteResult resultWithStatus:SQLiteStatus_ERROR messageAsString:@"Unable to open DB"];
+      }
+      
     }
   }
   
@@ -214,6 +214,59 @@ RCT_EXPORT_METHOD(open: (NSDictionary *) options success:(RCTResponseSenderBlock
   //NSLog(@"open cb finished ok");
 }
 
+- (sqlite3 *)openDatabase:(NSString *)dbname key:(NSString *)key{
+  sqlite3 *db;
+  if(!key) key = @"";
+  const char *name = [dbname UTF8String];
+  const char *dbkey = [key UTF8String];
+  bool openSuccess = sqlite3_open(name, &db) == SQLITE_OK
+  && sqlite3_create_function(db, "regexp", 2, SQLITE_ANY, NULL, &sqlite_regexp, NULL, NULL) == SQLITE_OK;
+  
+  if(key.length){
+    openSuccess = openSuccess && sqlite3_key(db, dbkey, strlen(dbkey)) == SQLITE_OK;
+  }
+  openSuccess = openSuccess && sqlite3_exec(db, (const char*)"SELECT count(*) FROM sqlite_master;", NULL, NULL, NULL) == SQLITE_OK;
+  
+  if(!openSuccess){
+    NSLog(@"Open database failed");
+  }
+  
+  return openSuccess ? db : nil;
+}
+
+- (sqlite3 *)encryptDatabase:(sqlite3 *)db key:(NSString *)key dbname:(NSString *)dbname{
+  NSString *tempDBname = [dbname stringByReplacingOccurrencesOfString:dbname.lastPathComponent withString:@"temp"];
+  
+  NSString *encryptCmd = [NSString stringWithFormat:@"ATTACH DATABASE '%@' AS encrypted KEY '%@';", tempDBname, key];
+  bool encryptSuccess = sqlite3_exec(db, (const char*)[encryptCmd cStringUsingEncoding:NSASCIIStringEncoding], NULL, NULL, NULL) == SQLITE_OK
+    && sqlite3_exec(db, (const char*)"SELECT sqlcipher_export('encrypted');", NULL, NULL, NULL) == SQLITE_OK
+    && sqlite3_exec(db, (const char*)"DETACH DATABASE encrypted;", NULL, NULL, NULL) == SQLITE_OK;
+  
+  if(!encryptSuccess){
+    [self deleteDB:dbname];
+    NSLog(@"Encrypt DB failed");
+    return nil;
+  }
+  
+  //close old db
+  sqlite3_close(db);
+  
+  //delete old db
+  [self deleteDB:dbname];
+  
+  //rename encertped db to old name
+  [[NSFileManager defaultManager] moveItemAtPath:tempDBname toPath:dbname error:nil];
+  
+  //open new encertped db
+  return [self openDatabase:dbname key:key];
+}
+
+- (void)deleteDB:(NSString *)dbname{
+  NSFileManager *fManager = [NSFileManager defaultManager];
+  if([fManager fileExistsAtPath:dbname]){
+    [fManager removeItemAtPath:dbname error:nil];
+  }
+}
 
 -(void)createFromResource:(NSString *)dbfile withDbname:(NSString *)dbname {
   NSString *bundleRoot = [[NSBundle mainBundle] resourcePath];
@@ -439,7 +492,7 @@ RCT_EXPORT_METHOD(executeSql: (NSDictionary *) options success:(RCTResponseSende
               break;
             case SQLITE_BLOB:
               columnValue = [SQLite getBlobAsBase64String: sqlite3_column_blob(statement, i)
-                                                   withLength: sqlite3_column_bytes(statement, i)];
+                                               withLength: sqlite3_column_bytes(statement, i)];
 #ifdef INCLUDE_SQL_BLOB_BINDING // TBD subjet to change:
               columnValue = [@"sqlblob:;base64," stringByAppendingString:columnValue];
 #endif
@@ -627,3 +680,5 @@ RCT_EXPORT_METHOD(executeSql: (NSDictionary *) options success:(RCTResponseSende
 }
 
 @end /* vim: set expandtab : */
+
+
