@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		33C7A86A21B4CC7B00A1408F /* SQLiteResult.h in Headers */ = {isa = PBXBuildFile; fileRef = C7DCD7151BE2D61E00F3300E /* SQLiteResult.h */; };
+		33C7A90221B4E88F00A1408F /* SQLite+NativeHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 33C7A90021B4E88F00A1408F /* SQLite+NativeHelper.h */; };
+		33C7A90321B4E88F00A1408F /* SQLite+NativeHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 33C7A90121B4E88F00A1408F /* SQLite+NativeHelper.m */; };
+		33C7A90421B5C7E500A1408F /* SQLite.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = C7DCD6E21BE0295900F3300E /* SQLite.h */; };
+		33C7A90521B5C7E600A1408F /* SQLiteResult.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = C7DCD7151BE2D61E00F3300E /* SQLiteResult.h */; };
+		33C7A90621B5C7E800A1408F /* SQLite+NativeHelper.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 33C7A90021B4E88F00A1408F /* SQLite+NativeHelper.h */; };
 		8D599B8E1C999AAF00170CA4 /* sqlite3.c in Sources */ = {isa = PBXBuildFile; fileRef = 8D599B8C1C999AAF00170CA4 /* sqlite3.c */; };
 		8D599B8F1C999AAF00170CA4 /* sqlite3.h in Headers */ = {isa = PBXBuildFile; fileRef = 8D599B8D1C999AAF00170CA4 /* sqlite3.h */; };
 		C7DCD6E41BE0295900F3300E /* SQLite.h in Headers */ = {isa = PBXBuildFile; fileRef = C7DCD6E21BE0295900F3300E /* SQLite.h */; };
@@ -21,12 +27,17 @@
 			dstPath = "include/$(PRODUCT_NAME)";
 			dstSubfolderSpec = 16;
 			files = (
+				33C7A90421B5C7E500A1408F /* SQLite.h in CopyFiles */,
+				33C7A90521B5C7E600A1408F /* SQLiteResult.h in CopyFiles */,
+				33C7A90621B5C7E800A1408F /* SQLite+NativeHelper.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		33C7A90021B4E88F00A1408F /* SQLite+NativeHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SQLite+NativeHelper.h"; sourceTree = "<group>"; };
+		33C7A90121B4E88F00A1408F /* SQLite+NativeHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "SQLite+NativeHelper.m"; sourceTree = "<group>"; };
 		8D599B8C1C999AAF00170CA4 /* sqlite3.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = sqlite3.c; path = ../common/sqlite3.c; sourceTree = "<group>"; };
 		8D599B8D1C999AAF00170CA4 /* sqlite3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sqlite3.h; path = ../common/sqlite3.h; sourceTree = "<group>"; };
 		C7DCD6E21BE0295900F3300E /* SQLite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SQLite.h; sourceTree = "<group>"; };
@@ -56,6 +67,8 @@
 				C7DCD6E31BE0295900F3300E /* SQLite.m */,
 				C7DCD7151BE2D61E00F3300E /* SQLiteResult.h */,
 				C7DCD7131BE2D5DE00F3300E /* SQLiteResult.m */,
+				33C7A90021B4E88F00A1408F /* SQLite+NativeHelper.h */,
+				33C7A90121B4E88F00A1408F /* SQLite+NativeHelper.m */,
 			);
 			name = SQLite;
 			sourceTree = "<group>";
@@ -85,8 +98,10 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				33C7A86A21B4CC7B00A1408F /* SQLiteResult.h in Headers */,
 				8D599B8F1C999AAF00170CA4 /* sqlite3.h in Headers */,
 				C7DCD6E41BE0295900F3300E /* SQLite.h in Headers */,
+				33C7A90221B4E88F00A1408F /* SQLite+NativeHelper.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -147,6 +162,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				33C7A90321B4E88F00A1408F /* SQLite+NativeHelper.m in Sources */,
 				C7DCD7141BE2D5DE00F3300E /* SQLiteResult.m in Sources */,
 				8D599B8E1C999AAF00170CA4 /* sqlite3.c in Sources */,
 				C7DCD6E51BE0295A00F3300E /* SQLite.m in Sources */,

@@ -55,6 +55,14 @@
   return [[self alloc] initWithStatus:statusOrdinal message:theMessage];
 }
 
-
+- (sqlite3 *)openedDB{
+  sqlite3 *db = nil;
+  
+  if(_dbPointer != NULL){
+    db = _dbPointer.pointerValue;
+  }
+  
+  return db;
+}
 
 @end

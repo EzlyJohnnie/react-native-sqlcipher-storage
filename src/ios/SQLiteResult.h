@@ -13,6 +13,9 @@
  * See http://opensource.org/licenses/alphabetical for full text.
  */
 
+
+#import "sqlite3.h"
+
 typedef enum {
   SQLiteStatus_NO_RESULT = 0,
   SQLiteStatus_OK,
@@ -24,9 +27,11 @@ typedef enum {
 
 @property (nonatomic, strong, readonly) NSNumber* status;
 @property (nonatomic, strong, readonly) id message;
+@property (nonatomic, strong) NSValue *dbPointer;
 
 + (SQLiteResult*)resultWithStatus:(SQLiteStatus)statusOrdinal messageAsString:(NSString*)theMessage;
 + (SQLiteResult*)resultWithStatus:(SQLiteStatus)statusOrdinal messageAsArray:(NSArray*)theMessage;
 + (SQLiteResult*)resultWithStatus:(SQLiteStatus)statusOrdinal messageAsDictionary:(NSDictionary*)theMessage;
+- (sqlite3 *)openedDB;
 
 @end
