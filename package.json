@@ -3,6 +3,7 @@
   "version": "0.0.3",
   "description": "SQLCipher bindings for React Native (Android & iOS)",
   "main": "sqlite.js",
+  "author": "Sylo",
   "scripts": {
     "test": "echo \"Error: no test specified yet\" && exit 1"
   },
